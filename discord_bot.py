@@ -18,7 +18,7 @@ load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 CHANNEL: Final[int] = int(os.getenv('DISCORD_CHANNEL'))
 SCOPES = ['https://www.googleapis.com/auth/drive']
-PARENT_FOLDER_ID = "1J71DXBs1ySpiYLJq4O6rjGym6D-se_ZO"
+PARENT_FOLDER_ID:Final[str] = os.getenv('PARENT_FOLDER_ID')
 
 intents = discord.Intents.default()
 #intents.message_content = True
