@@ -3,3 +3,4 @@ token.pickle
 .env
 bin
 downloads
+app.log

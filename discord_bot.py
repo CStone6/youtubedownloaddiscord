@@ -84,7 +84,7 @@ async def upload_video(file_path, name):
     ).execute()
 
     print("Uploaded file ID:", file.get('id'))
-    logging.info("Uploaded file ID:", file.get('id'))
+    logging.info(f"Uploaded file ID: {file.get('id')}")
 
 @client.event
 async def on_ready():
@@ -108,7 +108,15 @@ async def addvideo(ctx, url:str):
         info = await ay.get_video_info(url)
         config = DownloadConfig(quality=Quality.HD_1080P, video_format=VideoFormat.MP4)
         await ay.download(url=url, config=config)
-        await upload_video("downloads/"+info.title+".mp4", info.title)
+        
+        import glob
+        downloaded_files = glob.glob("downloads/*.mp4")
+        if not downloaded_files:
+            raise FileNotFoundError("No MP4 file found in downloads directory")
+        
+        downloaded_file = max(downloaded_files, key=os.path.getctime)
+        
+        await upload_video(downloaded_file, info.title)
         await ctx.followup.send(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
         print(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
     except Exception as e:
