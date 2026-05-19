@@ -4,7 +4,7 @@ from discord import option
 import os
 from typing import Final
 from dotenv import load_dotenv
-import tempfile
+
 from asyncyt import AsyncYT, Quality, DownloadConfig, VideoFormat
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -13,6 +13,17 @@ from google.auth.transport.requests import Request
 import os
 asyncio.set_event_loop(asyncio.new_event_loop())
 import pickle
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+logging.info("Script started")
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
@@ -31,9 +42,11 @@ def authenticate():
     if os.path.exists("token.pickle"):
         with open("token.pickle", "rb") as token:
             creds = pickle.load(token)
+            logging.info("token exists")
 
     # Login if needed
     if not creds or not creds.valid:
+        logging.error("no creds found")
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
@@ -71,19 +84,23 @@ async def upload_video(file_path, name):
     ).execute()
 
     print("Uploaded file ID:", file.get('id'))
+    logging.info("Uploaded file ID:", file.get('id'))
 
 @client.event
 async def on_ready():
     channel = client.get_channel(CHANNEL)
     print(f'We have logged in as {client.user}')
+    logging.info(f'We have logged in as {client.user}')
 
 @client.slash_command(name="addvideo", description="downloads a youtube video and adds it to a google drive folder")
 @option("url")
 async def addvideo(ctx, url:str):
+    logging.info("command used")
     try:
         await ctx.defer()
     except Exception as e:
         print(f"Error deferring: {e}")
+        logging.error(f"Error deferring:{e}")
         return
     
     try:
@@ -96,10 +113,12 @@ async def addvideo(ctx, url:str):
         print(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
     except Exception as e:
         print(f"Error in addvideo: {e}")
+        logging.error(f"Error in addvideo: {e}")
         try:
             await ctx.followup.send(f"{ctx.author.mention}: an error has occurred please try again or new url")
         except Exception as follow_error:
             print(f"Error sending followup: {follow_error}")
+            logging.error(f"Error sending followup: {follow_error}")
 
     
 
