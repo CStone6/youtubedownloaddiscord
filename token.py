@@ -4,10 +4,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import os
 import pickle
+from typing import Final
+from dotenv import load_dotenv
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
-PARENT_FOLDER_ID = "1J71DXBs1ySpiYLJq4O6rjGym6D-se_ZO"
+load_dotenv()
+PARENT_FOLDER_ID:Final[str] = os.getenv('PARENT_FOLDER_ID')
 
 def authenticate():
     creds = None
@@ -56,8 +59,11 @@ def upload_video(file_path, name):
     ).execute()
 
     print("Uploaded file ID:", file.get('id'))
-
+try:
+    open('works', 'a').close()
+except Exception as e:
+    pass
 upload_video(
-    file_path="downloads/Big Shot but Its ✨Teto✨.mp4",
-    name="Big Shot but Its ✨Teto✨"
+    file_path="works",
+    name="works"
 )

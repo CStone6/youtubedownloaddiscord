@@ -30,11 +30,12 @@ TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
 CHANNEL: Final[int] = int(os.getenv('DISCORD_CHANNEL'))
 SCOPES = ['https://www.googleapis.com/auth/drive']
 PARENT_FOLDER_ID:Final[str] = os.getenv('PARENT_FOLDER_ID')
+DRIVE_LINK:Final[str] = os.getenv('DRIVE_LINK')
 
 intents = discord.Intents.default()
-#intents.message_content = True
 client = discord.Bot(intents=intents)
 
+#this ↓ was ai because google hates me and did not do what the tutorial did. not the logging part
 def authenticate():
     creds = None
 
@@ -109,6 +110,7 @@ async def addvideo(ctx, url:str):
         config = DownloadConfig(quality=Quality.HD_1080P, video_format=VideoFormat.MP4)
         await ay.download(url=url, config=config)
         
+        #this glob part was also ai because i did not know there were other colons in the world 
         import glob
         downloaded_files = glob.glob("downloads/*.mp4")
         if not downloaded_files:
@@ -117,7 +119,7 @@ async def addvideo(ctx, url:str):
         downloaded_file = max(downloaded_files, key=os.path.getctime)
         
         await upload_video(downloaded_file, info.title)
-        await ctx.followup.send(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
+        await ctx.followup.send(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded to {DRIVE_LINK}")
         print(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
     except Exception as e:
         print(f"Error in addvideo: {e}")
@@ -128,12 +130,8 @@ async def addvideo(ctx, url:str):
             print(f"Error sending followup: {follow_error}")
             logging.error(f"Error sending followup: {follow_error}")
 
-    
-
 def run():
     client.run(TOKEN)
-    
-
 
 
 if __name__ == "__main__":
