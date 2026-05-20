@@ -4,7 +4,6 @@ from discord import option
 import os
 from typing import Final
 from dotenv import load_dotenv
-
 from asyncyt import AsyncYT, Quality, DownloadConfig, VideoFormat
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -107,6 +106,7 @@ async def addvideo(ctx, url:str):
     try:
         ay = AsyncYT()
         info = await ay.get_video_info(url)
+        logging.info(url)
         config = DownloadConfig(quality=Quality.HD_1080P, video_format=VideoFormat.MP4)
         await ay.download(url=url, config=config)
         
