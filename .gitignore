@@ -6,3 +6,4 @@ downloads
 app.log
 works
 .venv
+__pycache__
