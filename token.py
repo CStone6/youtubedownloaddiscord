@@ -1,23 +1,69 @@
-import pyautogui
-import keyboard
-import time
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+import os
+import pickle
+from typing import Final
+from dotenv import load_dotenv
 
-# Set the trigger key
-START_KEY = 'f6'
+SCOPES = ['https://www.googleapis.com/auth/drive']
 
-print(f"Waiting for you to press {START_KEY}...")
+load_dotenv()
+PARENT_FOLDER_ID:Final[str] = os.getenv('PARENT_FOLDER_ID')
 
-# This waits for the key to be pressed globally
-keyboard.wait(START_KEY)
+def authenticate():
+    creds = None
 
-print("Key detected! Starting clicks...")
+    # Load saved login token
+    if os.path.exists("token.pickle"):
+        with open("token.pickle", "rb") as token:
+            creds = pickle.load(token)
 
-# Optional: tiny delay so the key release doesn't interfere
-time.sleep(0.5)
+    # Login if needed
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                "credentials.json",
+                SCOPES
+            )
+            creds = flow.run_local_server(port=0)
 
+        # Save token
+        with open("token.pickle", "wb") as token:
+            pickle.dump(creds, token)
+
+    return creds
+
+def upload_video(file_path, name):
+    creds = authenticate()
+
+    service = build('drive', 'v3', credentials=creds)
+
+    file_metadata = {
+        'name': name,
+        'parents': [PARENT_FOLDER_ID]
+    }
+
+    media = MediaFileUpload(
+        file_path,
+        resumable=True
+    )
+
+    file = service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+    print("Uploaded file ID:", file.get('id'))
 try:
-    while True:
-        pyautogui.click()
-        time.sleep(0.1)
-except KeyboardInterrupt:
-    print("Stopped.")
+    open('works', 'a').close()
+except Exception as e:
+    pass
+upload_video(
+    file_path="works",
+    name="works"
+)

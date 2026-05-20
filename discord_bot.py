@@ -62,7 +62,7 @@ def authenticate():
 
     return creds
 
-async def upload_video(file_path, name):
+def upload_video(file_path, name):
     creds = authenticate()
 
     service = build('drive', 'v3', credentials=creds)
@@ -118,7 +118,7 @@ async def addvideo(ctx, url:str):
         
         downloaded_file = max(downloaded_files, key=os.path.getctime)
         
-        await upload_video(downloaded_file, info.title)
+        upload = await asyncio.to_thread(upload_video, downloaded_file, info.title)
         await ctx.followup.send(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded to {DRIVE_LINK}")
         print(f"{ctx.author.mention}: {info.title} has finished downloading and uploaded")
     except Exception as e:
